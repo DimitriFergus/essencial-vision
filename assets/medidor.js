@@ -15,7 +15,6 @@ const IRIS_MM = 11.7;      // diâmetro médio da íris
 const HFOV_DEG = 63;       // campo de visão horizontal típico de câmera frontal (estimativa)
 const EYE_ROT_MM = 13;     // distância do centro de rotação do olho até a pupila
 const AMOSTRAS = 45;       // medições usadas em cada leitura
-const TEMPO_MAX = 12000;   // ms para conseguir as amostras
 
 const $ = (s) => document.querySelector(s);
 const stage = $("#pd-stage");
@@ -127,7 +126,7 @@ function atualizarChecks(a) {
   setCheck("distancia", a.checks.distancia, mode === "photo" ? "Foto" : `≈ ${cm} cm ${a.distCam < 280 ? "· afaste-se" : a.distCam > 700 ? "· aproxime-se" : ""}`);
   setCheck("reto", a.checks.reto, a.checks.reto ? "Rosto de frente" : "Olhe reto para a câmera");
   setCheck("olhos", a.checks.olhos, a.checks.olhos ? "Olhos bem abertos" : "Abra bem os olhos");
-  $("#pd-dica").textContent = a.ok ? "Perfeito! Mantenha a posição" :
+  $("#pd-dica").textContent = a.ok ? (coleta ? "Medindo… fique parado(a)" : "Medição concluída ✓") :
     !a.checks.distancia ? (a.distCam < 280 ? "Afaste um pouco o aparelho" : "Aproxime um pouco o aparelho") :
     !a.checks.reto ? "Deixe o rosto reto, olhando para a câmera" : "Abra bem os olhos";
   stage.classList.toggle("pd-ok", a.ok);
@@ -139,13 +138,23 @@ const desvio = (arr) => { const m = arr.reduce((s, v) => s + v, 0) / arr.length;
 const meio = (v) => Math.round(v * 2) / 2; // arredonda para 0,5 mm
 const fmt = (v) => meio(v).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+/* Medição automática: começa sozinha assim que o rosto está na posição certa
+   (distância, rosto reto e olhos abertos) e termina quando a leitura fica estável. */
+const VARIACAO_OK = 1.2;   // mm — abaixo disso a leitura é considerada estável
+const MAX_TENTATIVAS = 3;  // refaz sozinho se a leitura variar demais
+const PAUSA_RESET = 1500;  // ms fora de posição que zeram a coleta
+let tentativas = 0;
+let ultimoOk = 0;
+
+const novaColeta = () => ({ longe: [], od: [], oe: [] });
+
 function iniciarMedicao() {
   if (mode !== "video") return;
-  coleta = { longe: [], od: [], oe: [], inicio: performance.now() };
+  tentativas = 0;
+  coleta = novaColeta();
   $("#pd-resultado").hidden = true;
-  $("#btn-medir").disabled = true;
-  $("#btn-medir").textContent = "Medindo… fique parado(a)";
-  progresso(0);
+  $("#btn-medir").hidden = true;
+  progresso(null);
 }
 
 function progresso(p) {
@@ -155,27 +164,37 @@ function progresso(p) {
 
 function coletar(a) {
   if (!coleta) return;
+  const agora = performance.now();
   if (a?.ok) {
+    ultimoOk = agora;
     coleta.longe.push(a.longe); coleta.od.push(a.od); coleta.oe.push(a.oe);
     progresso(coleta.longe.length / AMOSTRAS);
+  } else if (coleta.longe.length && agora - ultimoOk > PAUSA_RESET) {
+    coleta = novaColeta(); // saiu da posição por muito tempo: recomeça
+    progresso(null);
   }
-  if (coleta.longe.length >= AMOSTRAS) {
-    const r = {
-      longe: mediana(coleta.longe), od: mediana(coleta.od), oe: mediana(coleta.oe),
-      variacao: desvio(coleta.longe), origem: "câmera",
-    };
-    coleta = null;
-    finalizar(r);
-  } else if (performance.now() - coleta.inicio > TEMPO_MAX) {
-    coleta = null;
-    finalizar(null, "Não conseguimos uma leitura estável. Verifique a luz, fique de frente e tente de novo.");
+  if (coleta.longe.length < AMOSTRAS) return;
+
+  const r = {
+    longe: mediana(coleta.longe), od: mediana(coleta.od), oe: mediana(coleta.oe),
+    variacao: desvio(coleta.longe), origem: "câmera",
+  };
+  tentativas++;
+  if (r.variacao >= VARIACAO_OK && tentativas < MAX_TENTATIVAS) {
+    coleta = novaColeta(); // leitura instável: mede de novo sem incomodar o cliente
+    progresso(0);
+    return;
   }
+  coleta = null;
+  finalizar(r);
 }
 
 function finalizar(r, erro, rolar = true) {
   progresso(null);
-  $("#btn-medir").disabled = mode !== "video";
+  $("#btn-medir").hidden = mode !== "video";
+  $("#btn-medir").disabled = false;
   $("#btn-medir").textContent = "Medir novamente";
+  if (mode === "video") $("#pd-dica").textContent = "Medição concluída ✓";
   if (!r) { status(erro, true); return; }
   status("");
   ultimoResultado = r;
@@ -190,7 +209,7 @@ function finalizar(r, erro, rolar = true) {
               : "A leitura variou bastante. Recomendamos medir mais uma vez.";
   $("#pd-resultado").hidden = false;
   try { localStorage.setItem("ev_dp", JSON.stringify({ ...r, data: Date.now() })); } catch {}
-  if (rolar) $("#pd-resultado").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  if (rolar) setTimeout(() => $("#pd-resultado").scrollIntoView({ behavior: "smooth", block: "center" }), 150);
 }
 
 /* ---------- MediaPipe ---------- */
@@ -222,8 +241,7 @@ function setModo(m) {
   $("#pd-intro").hidden = m !== "idle";
   $("#btn-camera").hidden = m === "video";
   $("#btn-parar").hidden = m === "idle";
-  $("#btn-medir").hidden = m !== "video";
-  $("#btn-medir").disabled = m !== "video";
+  $("#btn-medir").hidden = true; // a medição pela câmera é automática
   $("#pd-dica").hidden = m !== "video";
   if (m === "idle") { ctx.clearRect(0, 0, W, H); stage.style.aspectRatio = ""; stage.style.maxWidth = ""; atualizarChecks(null); }
 }
@@ -246,6 +264,7 @@ async function abrirCamera() {
     video.hidden = false;
     setFonte(video.videoWidth, video.videoHeight);
     setModo("video");
+    iniciarMedicao();
     status("");
   } catch (e) {
     console.error(e);
@@ -259,6 +278,7 @@ async function abrirCamera() {
 }
 
 function pararCamera() {
+  tentativas = 0;
   stream?.getTracks().forEach((t) => t.stop());
   stream = null;
   coleta = null;
@@ -350,7 +370,7 @@ $("#pd-copiar").addEventListener("click", async () => {
 /* Mostra a última medição salva neste aparelho */
 try {
   const salvo = JSON.parse(localStorage.getItem("ev_dp"));
-  if (salvo?.longe) { finalizar(salvo, null, false); $("#btn-medir").textContent = "Medir agora"; }
+  if (salvo?.longe) finalizar(salvo, null, false);
 } catch {}
 
 setModo("idle");
