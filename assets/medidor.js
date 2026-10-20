@@ -28,7 +28,7 @@ const DIST_TOL = 60;           // tolerância: 34 a 46 cm
 const DIST_MIN_BARRA = 200, DIST_MAX_BARRA = 700;
 const TOTAL_FOTOS = 5;
 const QUADROS_POR_FOTO = 5;    // cada foto = mediana de 5 quadros seguidos
-const INTERVALO_FOTOS = 700;   // ms entre fotos
+const ESPERA_FOTO = 2000;      // ms parado(a) na posição certa antes de cada foto
 const TEMPO_TROCA_OLHO = 5000; // ms para trocar a mão de olho no modo estrabismo
 const LIMITE_DESALINHO = 0.09; // diferença de posição das íris que indica olhos desalinhados
 const SIM_DESVIO_MM = 4;       // desvio usado na simulação de estrabismo
@@ -266,7 +266,7 @@ function tirarFoto(quadros) {
   $("#pd-flash").classList.remove("on"); void $("#pd-flash").offsetWidth; $("#pd-flash").classList.add("on");
   $("#pd-contador").textContent = `Foto ${med.fotos.length} de ${TOTAL_FOTOS}`;
   falar(`Foto ${med.fotos.length}`, true);
-  med.ultimaFotoEm = performance.now();
+  med.esperaDesde = null; // a próxima foto espera mais 2 s
 
   if (med.fotos.length < TOTAL_FOTOS) return;
 
@@ -316,7 +316,7 @@ function iniciarMedicao() {
   med = {
     etapas: umOlho ? ["OD", "OE"] : ["ambos"],
     etapaIdx: 0, fotos: [], quadros: [], resultados: {},
-    ultimaFotoEm: 0, pausaAte: 0,
+    esperaDesde: null, pausaAte: 0,
   };
   $("#pd-resultado").hidden = true;
   $("#pd-alerta").hidden = true;
@@ -329,14 +329,30 @@ function iniciarMedicao() {
   if (umOlho) mostrarTrocaDeOlho();
 }
 
+/* Cada foto só é tirada depois de 2 s seguidos na posição certa.
+   Se a pessoa sair da posição, a contagem recomeça. */
 function processarQuadro(a) {
-  if (!med || trocandoOlho()) return;
-  if (!a?.ok) { med.quadros = []; return; } // precisa de quadros seguidos e válidos
-  med.quadros.push(a);
-  if (med.quadros.length >= QUADROS_POR_FOTO && performance.now() - med.ultimaFotoEm >= INTERVALO_FOTOS) {
-    tirarFoto(med.quadros.slice(-QUADROS_POR_FOTO));
-    if (med) med.quadros = []; // med vira null quando a medição termina
+  if (!med) return;
+  if (trocandoOlho()) { med.esperaDesde = null; med.quadros = []; return; }
+  const agora = performance.now();
+  const proxima = med.fotos.length + 1;
+  if (!a?.ok) {
+    med.quadros = [];
+    med.esperaDesde = null;
+    $("#pd-contador").textContent = `Foto ${proxima} de ${TOTAL_FOTOS} · aguardando posição`;
+    return;
   }
+  if (med.esperaDesde === null) med.esperaDesde = agora;
+  med.quadros.push(a);
+  if (med.quadros.length > QUADROS_POR_FOTO) med.quadros.shift(); // usa os quadros do fim da espera
+  const resta = ESPERA_FOTO - (agora - med.esperaDesde);
+  if (resta > 0 || med.quadros.length < QUADROS_POR_FOTO) {
+    $("#pd-contador").textContent = `Foto ${proxima} de ${TOTAL_FOTOS} em ${Math.max(1, Math.ceil(resta / 1000))}…`;
+    $("#pd-stage").style.setProperty("--espera", Math.min(1, (agora - med.esperaDesde) / ESPERA_FOTO));
+    return;
+  }
+  tirarFoto(med.quadros.slice());
+  if (med) { med.quadros = []; $("#pd-stage").style.setProperty("--espera", 0); } // med vira null quando a medição termina
 }
 
 function fotoMaisProximaDaMediana(fotos, etapa, alvo) {

@@ -682,3 +682,10 @@ textarea.field { resize: vertical; min-height: 110px; }
 .pd-alerta strong { font-size: .9rem; color: #8a5a10; }
 .pd-alerta p { font-size: .82rem; color: #6b5a3a; margin: 4px 0 10px; }
 @media (max-width: 520px) { .pd-fotos__grid { gap: 5px; } .pd-foto small { font-size: .66rem; } }
+/* anel de espera de 2 s em volta do ponto fixo */
+.pd-ponto::after {
+  content: ""; position: absolute; inset: -10px; border-radius: 50%;
+  background: conic-gradient(#3fbf7f calc(var(--espera, 0) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%);
+          mask: radial-gradient(circle, transparent 62%, #000 63%);
+}
