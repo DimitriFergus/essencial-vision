@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Óculos | Essencial Vision Ótica</title>
+  <meta name="description" content="Catálogo de óculos de grau, óculos de sol e infantis da Essencial Vision Ótica. Parcele em até 10x sem juros.">
+  <link rel="icon" href="assets/logo-instagram.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Início</a> / Óculos</div>
+        <h1>Nossa coleção</h1>
+        <p>Armações para todos os estilos: grau, sol e infantil. Escolha seu modelo, adicione à sacola e finalize com a nossa equipe pelo WhatsApp.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:48px">
+      <div class="container catalog">
+        <aside class="filters" id="filters" aria-label="Filtros">
+          <h4>Buscar</h4>
+          <input class="field" id="f-busca" type="search" placeholder="Nome, cor, material…">
+
+          <h4>Categoria</h4>
+          <div class="chip-group">
+            <button class="chip" data-cat="todos">Todos</button>
+            <button class="chip" data-cat="grau">Grau</button>
+            <button class="chip" data-cat="sol">Sol</button>
+            <button class="chip" data-cat="infantil">Infantil</button>
+          </div>
+
+          <h4>Formato</h4>
+          <div class="chip-group" id="f-formato"></div>
+
+          <h4>Preço máximo</h4>
+          <input id="f-max" type="range" min="100" max="500" step="10" value="500" aria-label="Preço máximo">
+          <div class="range-label"><span>R$ 100</span><strong id="f-max-label">R$ 500,00</strong></div>
+
+          <div style="margin-top:24px;padding:16px;border-radius:12px;background:var(--cream);font-size:.82rem;color:var(--muted)">
+            <strong style="color:var(--navy)">Precisa de lentes?</strong><br>
+            As lentes de grau são orçadas conforme a sua receita. <a href="lentes.html" style="color:var(--gold-600);font-weight:600">Ver opções →</a>
+          </div>
+        </aside>
+
+        <div>
+          <div class="catalog__bar">
+            <p id="catalogo-count">Carregando…</p>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn--outline filters-toggle" id="filters-toggle" style="padding:10px 18px">Filtros</button>
+              <select class="field" id="f-ordem" aria-label="Ordenar">
+                <option value="relevancia">Mais relevantes</option>
+                <option value="menor">Menor preço</option>
+                <option value="maior">Maior preço</option>
+                <option value="nome">Nome (A–Z)</option>
+              </select>
+            </div>
+          </div>
+          <div class="products" id="catalogo-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white">
+      <div class="container">
+        <div class="features">
+          <div class="feature"><div class="feature__icon" data-icon="card"></div><h3>10x sem juros</h3><p>Parcele suas compras no cartão de crédito sem acréscimo.</p></div>
+          <div class="feature"><div class="feature__icon" data-icon="shield"></div><h3>Garantia</h3><p>Armações com garantia contra defeitos de fabricação.</p></div>
+          <div class="feature"><div class="feature__icon" data-icon="wrench"></div><h3>Ajustes grátis</h3><p>Ajuste, limpeza e troca de plaquetas sem custo.</p></div>
+          <div class="feature"><div class="feature__icon" data-icon="chat"></div><h3>Ajuda na escolha</h3><p>Fale conosco e receba sugestões para o seu rosto.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

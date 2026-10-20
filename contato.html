@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contato e Agendamento | Essencial Vision Ótica</title>
+  <meta name="description" content="Agende seu exame de vista ou fale com a Essencial Vision Ótica pelo WhatsApp.">
+  <link rel="icon" href="assets/logo-instagram.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Início</a> / Contato</div>
+        <h1>Agende seu atendimento</h1>
+        <p>Preencha o formulário e enviaremos sua solicitação direto para o nosso WhatsApp. Respondemos rapidinho!</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container contact">
+        <div class="card reveal">
+          <h2 style="font-size:2rem">Agendamento</h2>
+          <p style="color:var(--muted);margin:6px 0 24px">Exame de vista, orçamento de lentes, ajustes ou consultoria de estilo.</p>
+          <form id="form-agendar" class="form-grid">
+            <div>
+              <label for="ag-nome">Nome completo</label>
+              <input class="field" id="ag-nome" name="nome" required autocomplete="name" placeholder="Seu nome">
+            </div>
+            <div>
+              <label for="ag-tel">Telefone / WhatsApp</label>
+              <input class="field" id="ag-tel" name="telefone" type="tel" required autocomplete="tel" placeholder="(85) 90000-0000">
+            </div>
+            <div class="full">
+              <label for="ag-servico">Serviço</label>
+              <select class="field" id="ag-servico" name="servico" required>
+                <option>Exame de vista</option>
+                <option>Orçamento de lentes</option>
+                <option>Escolher armação (consultoria)</option>
+                <option>Ajuste / manutenção</option>
+                <option>Outro assunto</option>
+              </select>
+            </div>
+            <div>
+              <label for="ag-data">Data preferida</label>
+              <input class="field" id="ag-data" name="data" type="date">
+            </div>
+            <div>
+              <label for="ag-periodo">Período</label>
+              <select class="field" id="ag-periodo" name="periodo">
+                <option>Manhã</option>
+                <option>Tarde</option>
+                <option>Qualquer horário</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="ag-msg">Observações (opcional)</label>
+              <textarea class="field" id="ag-msg" name="mensagem" placeholder="Conte um pouco sobre o que você precisa…"></textarea>
+            </div>
+            <div class="full">
+              <button type="submit" class="btn btn--primary btn--block"><span data-icon="whatsapp"></span> Enviar pelo WhatsApp</button>
+              <div class="form-ok" id="form-ok" role="status">Pronto! Abrimos o WhatsApp com a sua mensagem. É só tocar em enviar.</div>
+            </div>
+          </form>
+        </div>
+
+        <div class="reveal">
+          <div class="card">
+            <ul class="info-list">
+              <li><div class="feature__icon" data-icon="whatsapp"></div><div><strong>WhatsApp</strong><a data-wa="Olá! Vim pelo site da Essencial Vision.">(85) 99143-8421</a></div></li>
+              <li><div class="feature__icon" data-icon="instagram"></div><div><strong>Instagram</strong><a href="https://instagram.com/oticaessencialvision" target="_blank" rel="noopener">@oticaessencialvision</a></div></li>
+              <li><div class="feature__icon" data-icon="pin"></div><div><strong>Endereço</strong><span>Endereço da loja — a definir</span></div></li>
+              <li><div class="feature__icon" data-icon="clock"></div><div style="flex:1"><strong>Horário de funcionamento</strong>
+                <div class="hours">
+                  <div><span>Segunda a sexta</span><span>8h às 18h</span></div>
+                  <div><span>Sábado</span><span>8h às 13h</span></div>
+                  <div><span>Domingo e feriados</span><span>Fechado</span></div>
+                </div></div></li>
+            </ul>
+          </div>
+          <div class="map">
+            <div>
+              <span data-icon="pin" style="display:block;width:36px;margin:0 auto 10px;color:var(--gold)"></span>
+              Espaço para o mapa da loja.<br>Cole aqui o código de incorporação do Google Maps.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

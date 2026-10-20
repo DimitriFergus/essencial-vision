@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provador Virtual | Essencial Vision Ótica</title>
+  <meta name="description" content="Experimente os óculos da Essencial Vision no seu rosto, em 3D, usando a câmera do celular ou do computador.">
+  <link rel="icon" href="assets/logo-instagram.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Início</a> / Provador virtual</div>
+        <h1>Provador virtual</h1>
+        <p>Experimente nossos óculos no seu rosto, em 3D, pela câmera do celular ou do computador. Gire a cabeça, troque as cores e tire uma foto para comparar.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:48px">
+      <div class="container tryon">
+        <!-- Palco: câmera + 3D -->
+        <div>
+          <div class="tryon__stage" id="tryon-stage" data-mode="preview">
+            <video id="tryon-video" playsinline muted autoplay hidden></video>
+            <img id="tryon-photo" alt="Sua foto" hidden>
+            <canvas id="tryon-canvas" aria-label="Óculos em 3D"></canvas>
+            <div class="tryon__badge">3D · arraste para girar</div>
+            <div class="tryon__hint" id="tryon-hint" hidden>Posicione o rosto de frente para a câmera</div>
+            <div class="tryon__status" id="tryon-status" role="status" hidden></div>
+          </div>
+
+          <div class="tryon__controls">
+            <button class="btn btn--primary" id="btn-camera"><span data-icon="eye"></span> Ativar câmera</button>
+            <label class="btn btn--outline" for="tryon-upload" style="margin:0">Enviar uma foto</label>
+            <input type="file" id="tryon-upload" accept="image/*" hidden>
+            <button class="btn btn--gold" id="btn-foto" disabled>Tirar foto</button>
+            <button class="btn btn--outline" id="btn-parar" hidden>Voltar ao 3D</button>
+          </div>
+          <p class="tryon__privacy"><span data-icon="shield"></span> Sua imagem é processada só no seu aparelho. Nada é gravado nem enviado para a internet.</p>
+        </div>
+
+        <!-- Painel -->
+        <aside class="tryon__panel">
+          <h4 class="tryon__label">1. Escolha o modelo</h4>
+          <div class="tryon__models">
+            <button class="tryon__model" data-modelo="ev-101"><div data-art="redondo|#6b4423|#9fb3c8|0.2"></div><span>Aurora</span></button>
+            <button class="tryon__model" data-modelo="ev-105"><div data-art="quadrado|#1c1c1f|#9fb3c8|0.2"></div><span>Atlas</span></button>
+            <button class="tryon__model" data-modelo="ev-201"><div data-art="aviador|#b08a55|#3d4a3a|0.85"></div><span>Riviera</span></button>
+          </div>
+
+          <h4 class="tryon__label">2. Escolha a cor · <span id="tryon-cor-nome" style="color:var(--gold-600)"></span></h4>
+          <div class="color-pick" id="tryon-cores"></div>
+
+          <h4 class="tryon__label">3. Ajuste no rosto</h4>
+          <label for="tryon-tamanho" class="range-label"><span>Tamanho</span></label>
+          <input type="range" id="tryon-tamanho" min="85" max="115" value="100">
+          <label for="tryon-altura" class="range-label" style="margin-top:8px"><span>Altura</span></label>
+          <input type="range" id="tryon-altura" min="-8" max="8" value="0" step="0.5">
+
+          <div class="tryon__product">
+            <span class="product__cat" id="tryon-cat"></span>
+            <h3 id="tryon-nome"></h3>
+            <div class="price" id="tryon-preco" style="padding-top:4px"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+              <button class="btn btn--primary" id="tryon-add" style="flex:1"><span data-icon="bag"></span> Adicionar à sacola</button>
+              <button class="btn btn--outline" id="tryon-wa" style="flex:1">Falar com a loja</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--white">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Como usar</span>
+          <h2>Prove em 3 passos</h2>
+        </div>
+        <div class="features features--3">
+          <div class="feature"><div class="feature__icon" data-icon="eye"></div><h3>Ative a câmera</h3><p>Permita o acesso à câmera quando o navegador pedir. Se preferir, envie uma foto de frente.</p></div>
+          <div class="feature"><div class="feature__icon" data-icon="sparkle"></div><h3>Escolha e ajuste</h3><p>Troque o modelo e a cor. Use os ajustes de tamanho e altura para deixar natural.</p></div>
+          <div class="feature"><div class="feature__icon" data-icon="chat"></div><h3>Gostou? Fale com a gente</h3><p>Tire uma foto, adicione à sacola e finalize pelo WhatsApp. Ajustamos tudo na loja.</p></div>
+        </div>
+        <p style="text-align:center;color:var(--muted);font-size:.85rem;margin-top:28px">A simulação é ilustrativa. Tamanho e cor reais podem variar um pouco. Venha provar na loja!</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/app.js"></script>
+  <script type="module" src="assets/provador.js"></script>
+</body>
+</html>
