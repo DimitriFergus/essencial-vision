@@ -106,6 +106,11 @@ const CORES = {
 };
 
 const PRODUTOS = [
+  // Produto real da loja (fotos em assets/produtos/)
+  { id: "ev-401", nome: "Essencial Air", categoria: "grau", formato: "sem aro", material: "Metal", cores: ["Prata"], preco: 459.9, de: null, tag: "Exclusivo", tamanho: "53□18 145",
+    fotos: ["assets/produtos/essencial-air-1.jpg", "assets/produtos/essencial-air-2.jpg", "assets/produtos/essencial-air-3.jpg", "assets/produtos/essencial-air-4.jpg"],
+    desc: "Armação sem aro (parafusada) em metal prateado, com lentes retangulares e cantos suaves. Quase não pesa no rosto e deixa o visual leve e elegante. Ponte fina com plaquetas de silicone e hastes delgadas com acabamento acetinado. Nas fotos, com lentes antirreflexo com filtro de luz azul (lentes cotadas à parte)." },
+
   // Óculos de grau
   { id: "ev-101", nome: "Aurora",     categoria: "grau", formato: "redondo",    material: "Acetato",       cores: ["Tartaruga", "Preto", "Transparente"], preco: 289.9, de: null,  tag: "Novo",       tamanho: "49□20 145", desc: "Armação redonda em acetato com acabamento polido. Leve e atemporal, combina com rostos quadrados e de traços marcantes." },
   { id: "ev-102", nome: "Lumière",    categoria: "grau", formato: "gatinho",    material: "Acetato",       cores: ["Vinho", "Preto", "Rosé"],            preco: 329.9, de: 389.9, tag: "Oferta",     tamanho: "52□17 140", desc: "Gatinho sofisticado com cantos levemente elevados. Valoriza o olhar e traz um toque retrô elegante." },
@@ -130,7 +135,7 @@ const PRODUTOS = [
 ];
 
 // Modelos disponíveis no provador virtual (provador.html)
-const PROVADOR_IDS = ["ev-101", "ev-105", "ev-201"];
+const PROVADOR_IDS = ["ev-401", "ev-101", "ev-105", "ev-201"];
 
 const CAT_LABEL = { grau: "Óculos de grau", sol: "Óculos de sol", infantil: "Infantil" };
 
@@ -141,6 +146,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const waLink = (msg) => `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(msg)}`;
 
 function productArt(p, corNome) {
+  if (p.fotos) return `<img class="product__foto" src="${p.fotos[0]}" alt="${p.nome}" loading="lazy">`;
   const cor = CORES[corNome || p.cores[0]] || CORES.Preto;
   const isSol = p.categoria === "sol";
   return glassesSVG(p.formato, cor.frame, isSol ? (p.lente || "#2e2e33") : "#9fb3c8", isSol ? 0.85 : 0.22);
@@ -349,6 +355,19 @@ function productCard(p) {
 }
 
 /* ---------- Modal de produto ---------- */
+function galeria(p) {
+  return `<div class="galeria">
+    <img class="galeria__principal" src="${p.fotos[0]}" alt="${p.nome}">
+    <div class="galeria__miniaturas">${p.fotos.map((f, i) => `<button data-foto="${f}" class="${i === 0 ? "active" : ""}" aria-label="Foto ${i + 1}"><img src="${f}" alt=""></button>`).join("")}</div>
+  </div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-foto]");
+  if (!b) return;
+  const g = b.closest(".galeria");
+  g.querySelector(".galeria__principal").src = b.dataset.foto;
+  g.querySelectorAll("[data-foto]").forEach((x) => x.classList.toggle("active", x === b));
+});
 function renderModal() {
   if ($("#modal")) return;
   document.body.insertAdjacentHTML("beforeend", `<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="modal__box" id="modal-box"></div></div>`);
@@ -365,7 +384,7 @@ function openProduct(id) {
   const draw = () => {
     box.innerHTML = `
       <button class="modal__close" aria-label="Fechar">${ICON.close}</button>
-      <div class="modal__img">${productArt(p, cor)}</div>
+      <div class="modal__img${p.fotos ? " modal__img--fotos" : ""}">${p.fotos ? galeria(p) : productArt(p, cor)}</div>
       <div class="modal__body">
         <span class="product__cat">${CAT_LABEL[p.categoria]} · Ref. ${p.id.toUpperCase()}</span>
         <h3>${p.nome}</h3>
@@ -410,7 +429,7 @@ document.addEventListener("keydown", (e) => {
 function initHome() {
   const el = $("#destaques");
   if (!el) return;
-  const ids = ["ev-105", "ev-102", "ev-201", "ev-108"];
+  const ids = ["ev-401", "ev-105", "ev-102", "ev-201"];
   el.innerHTML = ids.map((id) => productCard(PRODUTOS.find((p) => p.id === id))).join("");
 }
 

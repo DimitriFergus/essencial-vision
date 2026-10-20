@@ -15,6 +15,7 @@ const MP_MODEL = "https://storage.googleapis.com/mediapipe-models/face_landmarke
 
 /* ---------- Os 3 modelos disponíveis no provador ---------- */
 const MODELOS = {
+  "ev-401": { estilo: "sem-aro",  material: "metal",   lente: "clara" }, // produto real (Essencial Air)
   "ev-101": { estilo: "redondo",  material: "acetato", lente: "clara" },
   "ev-105": { estilo: "quadrado", material: "acetato", lente: "clara" },
   "ev-201": { estilo: "aviador",  material: "metal",   lente: "sol", corLente: "#33402f" },
@@ -143,7 +144,105 @@ function tube(points, radius, mat, closed = false) {
   return new THREE.Mesh(new THREE.TubeGeometry(curve, closed ? 160 : 48, radius, 12, closed), mat);
 }
 
+/* ---------- Essencial Air: armação sem aro (parafusada), medidas reais 53□18 ----------
+   Feito a partir das fotos do produto em assets/produtos/.
+   Unidades em mm. Lente do lado +x, com o nariz no lado -x. */
+function poligonoArredondado(cantos) {
+  const s = new THREE.Shape();
+  const n = cantos.length;
+  const pt = (i) => cantos[(i + n) % n];
+  for (let i = 0; i < n; i++) {
+    const [x, y, r] = pt(i), [px, py] = pt(i - 1), [nx, ny] = pt(i + 1);
+    const d1 = Math.hypot(px - x, py - y), d2 = Math.hypot(nx - x, ny - y);
+    const a = { x: x + ((px - x) / d1) * r, y: y + ((py - y) / d1) * r };
+    const b = { x: x + ((nx - x) / d2) * r, y: y + ((ny - y) / d2) * r };
+    if (i === 0) s.moveTo(a.x, a.y); else s.lineTo(a.x, a.y);
+    s.quadraticCurveTo(x, y, b.x, b.y);
+  }
+  s.closePath();
+  return s;
+}
+
+function buildSemAro() {
+  const g = new THREE.Group();
+  const LW = 26.5, LH = 18;          // meia largura e meia altura da lente (53 x 36 mm)
+  const PONTE = 9;                  // meia ponte (18 mm)
+  const cx = PONTE + LW;            // centro de cada lente
+  const outerX = cx + LW;           // borda externa da lente
+
+  const metal = new THREE.MeshStandardMaterial({ color: "#d9dde3", metalness: 0.9, roughness: 0.32 });
+  const silicone = new THREE.MeshPhysicalMaterial({ color: "#ffffff", transparent: true, opacity: 0.5, roughness: 0.15, depthWrite: false });
+  const faceLente = new THREE.MeshPhysicalMaterial({
+    color: "#dcd8ff", transparent: true, opacity: 0.13, roughness: 0.03, envMapIntensity: 2.6,
+    iridescence: 1, iridescenceIOR: 1.6, iridescenceThicknessRange: [320, 520], // reflexo arroxeado do antirreflexo
+    depthWrite: false, side: THREE.DoubleSide,
+  });
+  const bordaLente = new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.85, depthWrite: false }); // borda polida da lente brilha como nas fotos
+
+  // contorno da lente: topo reto, lado externo afunilando um pouco para baixo
+  const forma = poligonoArredondado([
+    [-LW + 1, -LH + 0.5, 5],   // baixo, lado do nariz
+    [LW - 1.2, -LH, 7],        // baixo, lado de fora
+    [LW, LH, 3.5],             // cima, lado de fora
+    [-LW + 0.5, LH, 3.5],      // cima, lado do nariz
+  ]);
+  const geoLente = new THREE.ExtrudeGeometry(forma, { depth: 1.6, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.3, bevelSegments: 2, curveSegments: 24 });
+  geoLente.translate(0, 0, -0.8);
+
+  const parafuso = (x, y) => {
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 4, 12), metal);
+    p.rotation.x = Math.PI / 2; p.position.set(x, y, 0);
+    return p;
+  };
+  const caixa = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), metal); m.position.set(x, y, z); return m; };
+
+  for (const side of [1, -1]) {
+    const lado = new THREE.Group();
+    lado.position.x = side * cx;
+    lado.scale.x = side;
+    const lente = new THREE.Mesh(geoLente, [faceLente, bordaLente]);
+    lente.renderOrder = 2;
+    lado.add(lente);
+    g.add(lado);
+
+    // fixação da ponte na lente (lado do nariz)
+    g.add(caixa(3, 4.5, 3.2, side * (PONTE + 2.5), LH - 3, 0));
+    g.add(parafuso(side * (PONTE + 2.5), LH - 3));
+    // braço e plaqueta de silicone
+    g.add(tube([new THREE.Vector3(side * (PONTE + 1.5), LH - 4.5, -1.6), new THREE.Vector3(side * (PONTE + 1), LH - 12, -4), new THREE.Vector3(side * (PONTE - 0.5), LH - 20, -6.5)], 0.45, metal));
+    const plaqueta = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), silicone);
+    plaqueta.scale.set(2.6, 5, 1.1);
+    plaqueta.rotation.y = side * 0.5;
+    plaqueta.position.set(side * (PONTE - 1.2), LH - 22, -7.5);
+    g.add(plaqueta);
+
+    // fixação da haste na lente (canto de cima, lado de fora)
+    const hx = side * (outerX - 1.8);
+    g.add(caixa(3.4, 4.5, 3.2, hx, LH - 4.5, 0));
+    g.add(parafuso(hx, LH - 4.5));
+    g.add(caixa(1.6, 3, 5, side * (outerX + 0.4), LH - 4.5, -3));
+    const dobradica = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 4.5, 14), metal);
+    dobradica.position.set(side * (outerX + 0.6), LH - 4.5, -6);
+    g.add(dobradica);
+
+    // haste: parte achatada perto da dobradiça + arame fino com ponta curvada
+    g.add(caixa(1, 3.6, 26, side * (outerX + 1.2), LH - 4.7, -20));
+    g.add(tube([
+      new THREE.Vector3(side * (outerX + 1.2), LH - 4.7, -32),
+      new THREE.Vector3(side * (outerX + 2.5), LH - 5, -70),
+      new THREE.Vector3(side * (outerX + 3.5), LH - 6, -100),
+      new THREE.Vector3(side * (outerX + 4), LH - 8, -113),
+      new THREE.Vector3(side * (outerX + 2.5), LH - 16, -124),
+    ], 0.8, metal));
+  }
+
+  // ponte: barra fina ligando as lentes por cima
+  g.add(tube([new THREE.Vector3(-(PONTE + 3.5), LH - 3, 1), new THREE.Vector3(0, LH - 1.5, 1.4), new THREE.Vector3(PONTE + 3.5, LH - 3, 1)], 0.9, metal));
+  return g;
+}
+
 function buildGlasses(cfg, corNome) {
+  if (cfg.estilo === "sem-aro") return buildSemAro();
   const g = new THREE.Group();
   const metal = cfg.material === "metal";
   const frameMat = frameMaterial(corNome, cfg.material);
@@ -220,19 +319,19 @@ function buildGlasses(cfg, corNome) {
 function disposeGroup(g) {
   g.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
-    if (o.material && o.material.map !== tortoiseTex) o.material.dispose?.();
+    if (o.material) [].concat(o.material).forEach((m) => { if (m.map !== tortoiseTex) m.dispose(); });
   });
 }
 
 /* ---------- Estado da interface ---------- */
 const state = {
-  id: new URLSearchParams(location.search).get("modelo") || "ev-101",
+  id: new URLSearchParams(location.search).get("modelo") || "ev-401",
   cor: null,
   tamanho: 1,
   altura: 0,
   mode: "preview", // preview | video | photo
 };
-if (!MODELOS[state.id]) state.id = "ev-101";
+if (!MODELOS[state.id]) state.id = "ev-401";
 
 function setModel(id, cor) {
   const p = PRODUTOS.find((x) => x.id === id);
