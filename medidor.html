@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medidor de DP | Essencial Vision Ótica</title>
+  <meta name="description" content="Meça sua distância pupilar (DP) pela câmera do celular ou do computador, de graça, com o medidor online da Essencial Vision Ótica.">
+  <link rel="icon" href="assets/logo-instagram.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Início</a> / Medidor de DP</div>
+        <h1>Medidor de distância pupilar</h1>
+        <p>Descubra sua DP (distância entre as pupilas) usando só a câmera. Essa medida é usada para centralizar as lentes dos seus óculos.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:48px">
+      <div class="container tryon">
+        <!-- Câmera -->
+        <div>
+          <div class="tryon__stage pd-stage" id="pd-stage" data-mode="idle">
+            <video id="pd-video" playsinline muted autoplay hidden></video>
+            <img id="pd-photo" alt="Sua foto" hidden>
+            <canvas id="pd-canvas" aria-hidden="true"></canvas>
+            <div class="pd-guide" aria-hidden="true"></div>
+            <div class="pd-intro" id="pd-intro">
+              <div class="pd-intro__art" data-art="redondo|#1f2a44|#9fb3c8|0.15"></div>
+              <strong>Pronto para medir?</strong>
+              <span>Tire os óculos, fique em um lugar bem iluminado e ative a câmera.</span>
+            </div>
+            <div class="tryon__hint" id="pd-dica" hidden>Centralize o rosto na moldura</div>
+            <div class="tryon__status" id="pd-status" role="status" hidden></div>
+            <div class="pd-progress" id="pd-progresso" hidden><span></span></div>
+          </div>
+
+          <div class="tryon__controls">
+            <button class="btn btn--primary" id="btn-camera"><span data-icon="eye"></span> Ativar câmera</button>
+            <button class="btn btn--gold" id="btn-medir" hidden>Medir agora</button>
+            <label class="btn btn--outline" for="pd-upload" style="margin:0">Enviar uma foto</label>
+            <input type="file" id="pd-upload" accept="image/*" hidden>
+            <button class="btn btn--outline" id="btn-parar" hidden>Recomeçar</button>
+          </div>
+          <p class="tryon__privacy"><span data-icon="shield"></span> Sua imagem é processada só no seu aparelho. Nada é gravado nem enviado para a internet.</p>
+        </div>
+
+        <!-- Painel -->
+        <aside class="tryon__panel">
+          <h4 class="tryon__label">Antes de medir</h4>
+          <ul class="checklist" style="margin:0 0 6px">
+            <li>Tire os óculos</li>
+            <li>Fique em um lugar bem iluminado</li>
+            <li>Segure o aparelho na altura dos olhos, a um braço de distância (cerca de 40 cm)</li>
+            <li>Olhe direto para a lente da câmera</li>
+          </ul>
+
+          <h4 class="tryon__label">Leitura ao vivo</h4>
+          <ul class="pd-checks">
+            <li data-check="rosto"><i></i><div>Rosto<small>—</small></div></li>
+            <li data-check="distancia"><i></i><div>Distância<small>—</small></div></li>
+            <li data-check="reto"><i></i><div>Posição<small>—</small></div></li>
+            <li data-check="olhos"><i></i><div>Olhos<small>—</small></div></li>
+          </ul>
+
+          <div class="pd-result" id="pd-resultado" hidden>
+            <span class="product__cat">Sua DP para longe</span>
+            <div class="pd-result__big"><span id="pd-valor">—</span> <small>mm</small></div>
+            <div class="pd-result__grid">
+              <div><small>Para perto (leitura)</small><strong><span id="pd-perto">—</span> mm</strong></div>
+              <div><small>Olho direito (OD)</small><strong><span id="pd-od">—</span> mm</strong></div>
+              <div><small>Olho esquerdo (OE)</small><strong><span id="pd-oe">—</span> mm</strong></div>
+            </div>
+            <p class="pd-result__note" id="pd-precisao"></p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <button class="btn btn--primary" id="pd-wa"><span data-icon="whatsapp"></span> Enviar para a loja</button>
+              <button class="btn btn--outline" id="pd-copiar">Copiar medidas</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Explicação -->
+    <section class="section section--white">
+      <div class="container split">
+        <div>
+          <span class="eyebrow">O que é DP?</span>
+          <h2>A medida que centraliza suas lentes</h2>
+          <p class="lead">A distância pupilar (DP) é a distância, em milímetros, entre o centro de uma pupila e o da outra. Em adultos ela costuma ficar entre 54 e 74 mm.</p>
+          <p style="color:var(--muted)">Com a DP certa, o centro óptico de cada lente fica bem na frente da sua pupila. Isso evita desconforto, dor de cabeça e visão embaçada, e é ainda mais importante em lentes multifocais e graus altos.</p>
+        </div>
+        <div class="steps pd-how">
+          <div class="step"><h3>Encontra o rosto</h3><p>A câmera localiza seus olhos e o contorno das íris.</p></div>
+          <div class="step"><h3>Usa a íris como régua</h3><p>A íris tem cerca de 11,7 mm em quase todos os adultos, e isso converte pixels em milímetros.</p></div>
+          <div class="step"><h3>Mede várias vezes</h3><p>São feitas dezenas de leituras e usamos o valor do meio, mais estável.</p></div>
+          <div class="step"><h3>Ajusta para longe</h3><p>Compensamos a convergência dos olhos ao olhar para a câmera.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="faq">
+          <details open><summary>A medição pela câmera é precisa?</summary><p>Ela costuma chegar a 1 ou 2 mm da medida feita com aparelho na ótica. É ótima como referência para pedidos e orçamentos. Para lentes multifocais ou graus altos, confirmamos a medida na loja, sem custo.</p></details>
+          <details><summary>Qual a diferença entre DP para longe e para perto?</summary><p>Ao olhar para perto os olhos se aproximam (convergem), por isso a DP de perto é cerca de 3 mm menor. Óculos de uso geral usam a DP de longe; óculos só de leitura usam a de perto.</p></details>
+          <details><summary>O que são OD e OE?</summary><p>É a DP monocular: a distância de cada pupila até o centro do nariz. OD é o olho direito e OE o esquerdo. Ela é usada em lentes multifocais e quando o rosto não é perfeitamente simétrico (o que é normal).</p></details>
+          <details><summary>Posso medir com óculos?</summary><p>Não. Os óculos refletem luz e distorcem a imagem dos olhos. Tire os óculos para medir.</p></details>
+        </div>
+        <div class="cta" style="margin-top:48px">
+          <div><h2>Prefere medir com a gente?</h2><p>Na loja medimos sua DP com precisão em segundos, de graça.</p></div>
+          <a href="contato.html" class="btn btn--primary">Agendar visita</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/app.js"></script>
+  <script type="module" src="assets/medidor.js"></script>
+</body>
+</html>

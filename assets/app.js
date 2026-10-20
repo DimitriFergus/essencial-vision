@@ -160,6 +160,7 @@ const PAGES = [
   { href: "index.html",    label: "Início" },
   { href: "catalogo.html", label: "Óculos" },
   { href: "provador.html", label: "Provador virtual" },
+  { href: "medidor.html",  label: "Medir DP" },
   { href: "lentes.html",   label: "Lentes & Serviços" },
   { href: "sobre.html",    label: "Sobre nós" },
   { href: "contato.html",  label: "Contato" },

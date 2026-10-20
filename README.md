@@ -6,6 +6,7 @@ Site da **Essencial Vision Ótica** (Instagram [@oticaessencialvision](https://i
 - `index.html`: início
 - `catalogo.html`: catálogo de óculos com filtros e sacola (o pedido é finalizado pelo WhatsApp)
 - `provador.html`: provador virtual 3D com câmera ou foto
+- `medidor.html`: medidor de distância pupilar (DP) pela câmera
 - `lentes.html`: lentes e serviços
 - `sobre.html`: sobre a loja
 - `contato.html`: agendamento pelo WhatsApp
