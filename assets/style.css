@@ -604,3 +604,81 @@ textarea.field { resize: vertical; min-height: 110px; }
 .pd-how { grid-template-columns: 1fr 1fr; }
 .pd-how .step p { color: var(--muted); }
 @media (max-width: 520px) { .pd-how { grid-template-columns: 1fr; } }
+
+/* ---------- Medidor de DP: 5 fotos, ponto fixo, distância, acessibilidade ---------- */
+.tryon__stage[data-mode="congelado"] img,
+.tryon__stage[data-mode="congelado"] canvas { transform: scaleX(-1); }
+.pd-stage:not([data-mode="video"]) .pd-guide { display: none; }
+
+/* ponto fixo para o olhar */
+.pd-ponto { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; pointer-events: none; display: none; }
+.pd-stage[data-mode="video"] .pd-ponto { display: block; }
+.pd-ponto::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(20,28,48,.55); animation: pd-pulso 1.6s ease-in-out infinite; }
+.pd-ponto span { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 2px #fff; }
+@keyframes pd-pulso { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .55; } }
+
+/* barra de distância */
+.pd-dist { position: absolute; left: 14px; right: 14px; top: 14px; padding: 8px 12px 6px; border-radius: 12px; background: rgba(20,28,48,.72); color: #fff; display: none; pointer-events: none; }
+.pd-stage[data-mode="video"] .pd-dist, .pd-stage[data-mode="congelado"] .pd-dist { display: block; }
+.pd-dist__track { position: relative; height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); }
+.pd-dist__zona { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: rgba(63,191,127,.75); }
+.pd-dist__marca { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--gold); transform: translate(-50%, -50%); transition: left .15s; }
+.pd-dist.ok .pd-dist__marca { border-color: #3fbf7f; }
+.pd-dist__labels { display: flex; justify-content: space-between; font-size: .7rem; margin-top: 4px; opacity: .9; }
+.pd-dist__labels strong { font-size: .78rem; }
+
+.pd-contador, .pd-etapa, .pd-sim {
+  position: absolute; left: 14px; padding: 6px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; pointer-events: none;
+}
+.pd-contador { top: 74px; background: var(--white); color: var(--navy); box-shadow: var(--shadow); }
+.pd-etapa { top: 74px; right: 14px; left: auto; background: var(--gold); color: #fff; }
+.pd-sim { top: 112px; right: 14px; background: #a3302a; color: #fff; text-align: center; }
+.pd-contador[hidden], .pd-etapa[hidden], .pd-sim[hidden] { display: none; }
+.pd-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.pd-flash.on { animation: pd-flash .35s ease-out; }
+@keyframes pd-flash { from { opacity: .75; } to { opacity: 0; } }
+
+/* aviso: tapar um olho */
+.pd-aviso {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 28px));
+  background: rgba(255,255,255,.96); color: var(--navy); border-radius: 18px; padding: 22px; text-align: center;
+  box-shadow: var(--shadow-lg); display: flex; flex-direction: column; gap: 6px; align-items: center;
+}
+.pd-aviso[hidden] { display: none; }
+.pd-aviso strong { font-size: 1.15rem; }
+.pd-aviso span { color: var(--muted); font-size: .9rem; }
+.pd-aviso__tempo { color: var(--gold-600); font-size: .95rem; margin-top: 4px; }
+.pd-aviso__olho { width: 92px; height: 40px; position: relative; }
+.pd-aviso__olho::before, .pd-aviso__olho::after {
+  content: ""; position: absolute; top: 4px; width: 38px; height: 30px; border-radius: 50%; border: 3px solid var(--navy); background: radial-gradient(circle, var(--navy) 0 6px, #fff 7px);
+}
+.pd-aviso__olho::before { left: 0; }
+.pd-aviso__olho::after { right: 0; }
+/* olho tapado: a tela é espelhada, então o olho esquerdo da pessoa aparece à esquerda */
+.pd-aviso[data-lado="OD"] .pd-aviso__olho::before, .pd-aviso[data-lado="OE"] .pd-aviso__olho::after { background: var(--gold); border-color: var(--gold); }
+
+/* faixa com as 5 fotos */
+.pd-fotos { margin-top: 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.pd-fotos[hidden] { display: none; }
+.pd-fotos__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.pd-fotos__head small { color: var(--muted); font-size: .78rem; }
+.pd-fotos__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.pd-foto { text-align: center; }
+.pd-foto__img { aspect-ratio: 4 / 3; border-radius: 10px; background: var(--cream); border: 2px dashed var(--line); display: grid; place-items: center; overflow: hidden; color: var(--muted); font-weight: 700; }
+.pd-foto__img img { width: 100%; height: 100%; object-fit: cover; }
+.pd-foto small { display: block; font-size: .75rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
+.pd-foto.ok .pd-foto__img { border: 2px solid #3fbf7f; }
+.pd-foto.ok small { color: var(--navy); }
+.pd-foto.mediana .pd-foto__img { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-100); }
+.pd-foto.mediana small::after { content: " · mediana"; color: var(--gold-600); }
+
+/* acessibilidade */
+.pd-toggle { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--cream); margin-bottom: 8px; cursor: pointer; font-weight: 400; }
+.pd-toggle input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--navy); flex-shrink: 0; }
+.pd-toggle strong { display: block; font-size: .88rem; }
+.pd-toggle small { display: block; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+.pd-alerta { margin-top: 14px; padding: 14px; border-radius: 12px; background: #fdf3e2; border: 1px solid #f0d7a8; }
+.pd-alerta[hidden] { display: none; }
+.pd-alerta strong { font-size: .9rem; color: #8a5a10; }
+.pd-alerta p { font-size: .82rem; color: #6b5a3a; margin: 4px 0 10px; }
+@media (max-width: 520px) { .pd-fotos__grid { gap: 5px; } .pd-foto small { font-size: .66rem; } }

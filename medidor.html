@@ -29,17 +29,45 @@
         <div>
           <div class="tryon__stage pd-stage" id="pd-stage" data-mode="idle">
             <video id="pd-video" playsinline muted autoplay hidden></video>
-            <img id="pd-photo" alt="Sua foto" hidden>
+            <img id="pd-photo" alt="Foto usada na medição" hidden>
             <canvas id="pd-canvas" aria-hidden="true"></canvas>
             <div class="pd-guide" aria-hidden="true"></div>
+
+            <!-- Ponto fixo para o olhar -->
+            <div class="pd-ponto" aria-hidden="true"><span></span></div>
+
+            <!-- Medidor de distância -->
+            <div class="pd-dist" id="pd-dist" aria-hidden="true">
+              <div class="pd-dist__track"><div class="pd-dist__zona" id="pd-dist-zona"></div><div class="pd-dist__marca" id="pd-dist-marca"></div></div>
+              <div class="pd-dist__labels"><span>Perto</span><strong id="pd-dist-txt">—</strong><span>Longe</span></div>
+            </div>
+
+            <div class="pd-contador" id="pd-contador" hidden></div>
+            <div class="pd-etapa" id="pd-etapa" hidden></div>
+            <div class="pd-sim" id="pd-sim" hidden>Simulação de estrabismo ativa</div>
+            <div class="pd-flash" id="pd-flash"></div>
+
+            <!-- Instrução do modo um olho de cada vez -->
+            <div class="pd-aviso" id="pd-aviso" hidden>
+              <div class="pd-aviso__olho" id="pd-aviso-olho"></div>
+              <strong id="pd-aviso-titulo"></strong>
+              <span id="pd-aviso-texto"></span>
+              <b class="pd-aviso__tempo" id="pd-aviso-tempo"></b>
+            </div>
+
             <div class="pd-intro" id="pd-intro">
               <div class="pd-intro__art" data-art="redondo|#1f2a44|#9fb3c8|0.15"></div>
               <strong>Pronto para medir?</strong>
-              <span>Tire os óculos, fique em um lugar bem iluminado e ative a câmera. A medição começa sozinha quando seu rosto estiver na posição certa.</span>
+              <span>Tire os óculos, ative a câmera e olhe para o ponto no meio da tela. Tiramos 5 fotos sozinhos quando você estiver a cerca de 40 cm.</span>
             </div>
-            <div class="tryon__hint" id="pd-dica" hidden>Centralize o rosto na moldura</div>
-            <div class="tryon__status" id="pd-status" role="status" hidden></div>
-            <div class="pd-progress" id="pd-progresso" hidden><span></span></div>
+            <div class="tryon__hint" id="pd-dica" role="status" aria-live="polite" hidden>Centralize o rosto na moldura</div>
+            <div class="tryon__status" id="pd-status" role="alert" hidden></div>
+          </div>
+
+          <!-- As 5 fotos -->
+          <div class="pd-fotos" id="pd-fotos" hidden>
+            <div class="pd-fotos__head"><strong id="pd-fotos-titulo">Fotos da medição</strong><small id="pd-fotos-info">A DP final é a mediana das 5 fotos</small></div>
+            <div class="pd-fotos__grid" id="pd-fotos-grid"></div>
           </div>
 
           <div class="tryon__controls">
@@ -56,15 +84,24 @@
         <aside class="tryon__panel">
           <h4 class="tryon__label">Antes de medir</h4>
           <ul class="checklist" style="margin:0 0 6px">
-            <li>Tire os óculos</li>
-            <li>Fique em um lugar bem iluminado</li>
-            <li>Segure o aparelho na altura dos olhos, a um braço de distância (cerca de 40 cm)</li>
-            <li>Olhe direto para a lente da câmera</li>
-            <li><strong>Pronto!</strong> A medição começa sozinha e o resultado aparece logo abaixo</li>
+            <li>Tire os óculos e fique em um lugar bem iluminado</li>
+            <li>Segure o aparelho na altura dos olhos, a cerca de <strong>40 cm</strong> (a barra fica verde)</li>
+            <li>Olhe para o <strong>ponto dourado</strong> no meio da tela</li>
+            <li>Tiramos <strong>5 fotos</strong> sozinhos e o resultado aparece logo abaixo</li>
           </ul>
 
-          <h4 class="tryon__label">Leitura ao vivo</h4>
-          <ul class="pd-checks">
+          <h4 class="tryon__label">Acessibilidade</h4>
+          <label class="pd-toggle">
+            <input type="checkbox" id="pd-estrabismo">
+            <span><strong>Tenho estrabismo ou um olho desviado</strong><small>Medimos um olho de cada vez: você tapa um olho e mede o outro.</small></span>
+          </label>
+          <label class="pd-toggle">
+            <input type="checkbox" id="pd-voz">
+            <span><strong>Guia por voz</strong><small>As instruções são faladas em voz alta.</small></span>
+          </label>
+
+          <h4 class="tryon__label" id="pd-leitura-titulo">Leitura ao vivo</h4>
+          <ul class="pd-checks" id="pd-checks">
             <li data-check="rosto"><i></i><div>Rosto<small>—</small></div></li>
             <li data-check="distancia"><i></i><div>Distância<small>—</small></div></li>
             <li data-check="reto"><i></i><div>Posição<small>—</small></div></li>
@@ -80,6 +117,11 @@
               <div><small>Olho esquerdo (OE)</small><strong><span id="pd-oe">—</span> mm</strong></div>
             </div>
             <p class="pd-result__note" id="pd-precisao"></p>
+            <div class="pd-alerta" id="pd-alerta" hidden>
+              <strong>Seus olhos parecem olhar para direções diferentes</strong>
+              <p>Isso pode acontecer se você não olhou para o ponto, ou em casos de estrabismo. Para uma medida mais confiável, meça um olho de cada vez.</p>
+              <button class="btn btn--gold btn--block" id="pd-modo-estrabismo">Medir um olho de cada vez</button>
+            </div>
             <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
               <button class="btn btn--primary" id="pd-wa"><span data-icon="whatsapp"></span> Enviar para a loja</button>
               <button class="btn btn--outline" id="pd-copiar">Copiar medidas</button>
@@ -113,6 +155,7 @@
           <details open><summary>A medição pela câmera é precisa?</summary><p>Ela costuma chegar a 1 ou 2 mm da medida feita com aparelho na ótica. É ótima como referência para pedidos e orçamentos. Para lentes multifocais ou graus altos, confirmamos a medida na loja, sem custo.</p></details>
           <details><summary>Qual a diferença entre DP para longe e para perto?</summary><p>Ao olhar para perto os olhos se aproximam (convergem), por isso a DP de perto é cerca de 3 mm menor. Óculos de uso geral usam a DP de longe; óculos só de leitura usam a de perto.</p></details>
           <details><summary>O que são OD e OE?</summary><p>É a DP monocular: a distância de cada pupila até o centro do nariz. OD é o olho direito e OE o esquerdo. Ela é usada em lentes multifocais e quando o rosto não é perfeitamente simétrico (o que é normal).</p></details>
+          <details><summary>Tenho estrabismo. Posso medir?</summary><p>Sim. Marque a opção “Tenho estrabismo ou um olho desviado”. Você tapa um olho com a mão e olha para o ponto com o outro, e depois inverte. Assim cada olho é medido enquanto está olhando reto. Se o medidor perceber que os olhos não estão alinhados, ele mesmo sugere esse modo.</p></details>
           <details><summary>Posso medir com óculos?</summary><p>Não. Os óculos refletem luz e distorcem a imagem dos olhos. Tire os óculos para medir.</p></details>
         </div>
         <div class="cta" style="margin-top:48px">
